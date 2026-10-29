@@ -1,0 +1,4 @@
+TransactionID,InternalAmount,ProcessorAmount,Currency,ReconciliationStatus,ExceptionReason,Difference
+T1001,500.00,500.00,INR,MATCHED,,0.00
+T1002,150.50,150.50,INR,MATCHED,,0.00
+T1003,999.99,999.99,INR,MATCHED,,0.00

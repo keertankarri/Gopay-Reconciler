@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GoPay Recon</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #ffffff; color: #000000; padding: 40px; }
+        .container { border: 2px solid #000000; background: #ffffff; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 5px 5px 0px #000000; }
+        .header { text-align: center; font-weight: 800; margin-bottom: 30px; font-size: 1.5em; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input[type="file"], input[type="number"] { background: #ffffff; color: #000000; border: 1px solid #000000; padding: 10px; width: 100%; box-sizing: border-box; }
+        button { background-color: #000000; color: #ffffff; border: 2px solid #000000; padding: 15px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; font-size: 1.1em; text-transform: uppercase; transition: 0.2s; }
+        button:hover { background-color: #ffffff; color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Payment Reconciliation</div>
+        <form action="/reconciliation/run" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Internal File (CSV):</label>
+                <input type="file" name="internal" accept=".csv" required>
+            </div>
+            <div class="form-group">
+                <label>Processor File (CSV):</label>
+                <input type="file" name="processor" accept=".csv" required>
+            </div>
+            <div class="form-group">
+                <label>Worker Count:</label>
+                <input type="number" name="workers" value="4" min="1" max="100" required>
+            </div>
+            <button type="submit">Run Reconciliation</button>
+        </form>
+    </div>
+</body>
+</html>

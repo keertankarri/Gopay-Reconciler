@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GoPay Recon - Dashboard</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #ffffff; color: #000000; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1, h2 { text-align: center; border-bottom: 3px solid #000000; padding-bottom: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        
+        .stats-grid { display: flex; justify-content: space-between; margin: 20px 0; background: #ffffff; padding: 20px; border: 2px solid #000000; box-shadow: 5px 5px 0px #000000; }
+        .stat-box { text-align: center; flex: 1; border-right: 1px solid #e0e0e0; }
+        .stat-box:last-child { border-right: none; }
+        .stat-title { font-weight: 700; font-size: 0.9em; text-transform: uppercase; color: #555; }
+        .stat-value { font-size: 2.2em; font-weight: 900; margin-top: 10px; }
+        .warn { color: #d97706; }
+        .danger { color: #dc2626; }
+        
+        /* New Filter Bar Styles */
+        .filter-bar { display: flex; gap: 15px; margin-top: 30px; margin-bottom: 10px; }
+        .filter-bar input, .filter-bar select { flex: 1; padding: 12px; border: 2px solid #000000; font-family: inherit; font-size: 1em; box-shadow: 3px 3px 0px #000000; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 2px solid #000000; box-shadow: 5px 5px 0px #000000; }
+        th, td { border: 1px solid #000000; padding: 12px; text-align: left; }
+        th { background-color: #000000; color: #ffffff; text-transform: uppercase; font-size: 0.9em; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .btn { display: inline-block; background-color: #000000; color: #ffffff; padding: 10px 20px; text-decoration: none; font-weight: bold; border: 2px solid #000000; transition: all 0.2s; text-transform: uppercase; font-size: 0.9em; }
+        .btn:hover { background-color: #ffffff; color: #000000; }
+        .header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-actions">
+            <a href="/" class="btn">&larr; Back to Upload</a>
+            <a href="/export" class="btn">Export CSV Report &rarr;</a>
+        </div>
+
+        <h1>Processing Results</h1>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-title">Total</div>
+                <div class="stat-value">{{.Stats.Total}}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Matched</div>
+                <div class="stat-value">{{.Stats.Matched}}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Amt Mismatch</div>
+                <div class="stat-value warn">{{.Stats.AmountMismatch}}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Stat Mismatch</div>
+                <div class="stat-value warn">{{.Stats.StatusMismatch}}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title">Missing</div>
+                <div class="stat-value danger">{{.Stats.MissingProcessor}}</div>
+            </div>
+        </div>
+
+        <h2>Exceptions Table</h2>
+        
+        <!-- NEW: Filter Bar -->
+        <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="Search by Transaction ID (e.g., TXN005)...">
+            <select id="statusFilter">
+                <option value="ALL">All Exceptions</option>
+                <option value="AMOUNT_MISMATCH">Amount Mismatch</option>
+                <option value="STATUS_MISMATCH">Status Mismatch</option>
+                <option value="MISSING_PROCESSOR">Missing Processor</option>
+                <option value="MISSING_INTERNAL">Missing Internal</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Txn ID</th>
+                    <th>Status</th>
+                    <th>Internal Amt</th>
+                    <th>Processor Amt</th>
+                    <th>Diff</th>
+                </tr>
+            </thead>
+            <tbody id="exceptionsTable">
+                {{range .Exceptions}}
+                <tr>
+                    <td><strong>{{.TransactionID}}</strong></td>
+                    <td>{{.ReconciliationStatus}}</td>
+                    <td>{{.InternalAmount}}</td>
+                    <td>{{.ProcessorAmount}}</td>
+                    <td>{{.Difference}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- NEW: Filter Logic -->
+    <script>
+        function filterTable() {
+            const searchVal = document.getElementById("searchInput").value.toUpperCase();
+            const statusVal = document.getElementById("statusFilter").value;
+            const table = document.getElementById("exceptionsTable");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                const txnCell = rows[i].getElementsByTagName("td")[0];
+                const statusCell = rows[i].getElementsByTagName("td")[1];
+
+                if (txnCell && statusCell) {
+                    const txnText = txnCell.textContent || txnCell.innerText;
+                    const statusText = statusCell.textContent || statusCell.innerText;
+
+                    const matchesSearch = txnText.toUpperCase().indexOf(searchVal) > -1;
+                    const matchesStatus = (statusVal === "ALL") || (statusText === statusVal);
+
+                    if (matchesSearch && matchesStatus) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        document.getElementById("searchInput").addEventListener("keyup", filterTable);
+        document.getElementById("statusFilter").addEventListener("change", filterTable);
+    </script>
+</body>
+</html>
